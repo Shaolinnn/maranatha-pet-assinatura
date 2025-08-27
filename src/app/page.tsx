@@ -4,22 +4,9 @@ import Image from 'next/image';
 import { Truck, PiggyBank, CalendarCheck } from 'lucide-react';
 import FaqAccordion from '@/components/FaqAccordion';
 import ProductSection from '@/components/ProductSection';
+import prisma from '@/lib/prisma'; // Passo 1: Importar o Prisma diretamente
 
-// Função para buscar os produtos da nossa API
-async function getProducts() {
-  // Em desenvolvimento, usamos a URL completa. Em produção, isso pode ser otimizado com variáveis de ambiente.
-  const res = await fetch('http://localhost:3000/api/products', {
-    cache: 'no-store', // Garante que os dados sejam sempre frescos durante o desenvolvimento
-  });
-
-  if (!res.ok) {
-    // Em um projeto real, trataríamos esse erro de forma mais elegante
-    throw new Error('Falha ao buscar produtos');
-  }
-  return res.json();
-}
-
-// Dados para a seção de FAQ
+// Dados para a seção de FAQ (pode vir do banco de dados no futuro)
 const faqItems = [
   {
     question: "Posso cancelar minha assinatura quando quiser?",
@@ -40,8 +27,9 @@ const faqItems = [
 ];
 
 export default async function Home() {
-  // Buscamos os dados no servidor ANTES da página ser enviada para o navegador
-  const products = await getProducts();
+  // Passo 2: Buscar os dados diretamente do banco de dados usando o Prisma
+  // Isso acontece no servidor antes da página ser enviada para o navegador.
+  const products = await prisma.product.findMany();
 
   return (
     <main>
@@ -167,7 +155,8 @@ export default async function Home() {
       </section>
     
       {/* Seção 4: Catálogo de Produtos */}
-      <ProductSection initialProducts={products} />
+      {/* Passo 3: Passar os dados serializados para o Componente de Cliente */}
+      <ProductSection initialProducts={JSON.parse(JSON.stringify(products))} />
 
       {/* Seção 5: FAQ */}
       <section id="faq" className="w-full bg-maranatha-beige py-20">
