@@ -1,103 +1,188 @@
-import Image from "next/image";
+// src/app/page.tsx
 
-export default function Home() {
+import Image from 'next/image';
+import { Truck, PiggyBank, CalendarCheck } from 'lucide-react';
+import FaqAccordion from '@/components/FaqAccordion';
+import ProductSection from '@/components/ProductSection';
+
+// Função para buscar os produtos da nossa API
+async function getProducts() {
+  // Em desenvolvimento, usamos a URL completa. Em produção, isso pode ser otimizado com variáveis de ambiente.
+  const res = await fetch('http://localhost:3000/api/products', {
+    cache: 'no-store', // Garante que os dados sejam sempre frescos durante o desenvolvimento
+  });
+
+  if (!res.ok) {
+    // Em um projeto real, trataríamos esse erro de forma mais elegante
+    throw new Error('Falha ao buscar produtos');
+  }
+  return res.json();
+}
+
+// Dados para a seção de FAQ
+const faqItems = [
+  {
+    question: "Posso cancelar minha assinatura quando quiser?",
+    answer: "Sim! Você tem flexibilidade total para cancelar, pausar ou alterar sua assinatura a qualquer momento, sem nenhuma taxa ou multa. O controle está sempre nas suas mãos."
+  },
+  {
+    question: "Como funciona o pagamento?",
+    answer: "O pagamento é feito de forma automática e segura através do seu cartão de crédito, processado pelo Mercado Pago. A cobrança ocorre sempre no dia do mês que você escolheu ao assinar."
+  },
+  {
+    question: "Posso pular uma entrega se for viajar?",
+    answer: "Com certeza! Em seu painel de cliente, você terá a opção de 'pular' a próxima entrega com apenas um clique, e a cobrança daquele mês não será realizada."
+  },
+  {
+    question: "E se eu quiser trocar a ração da assinatura?",
+    answer: "É muito simples. Basta acessar sua área de assinante, cancelar o plano atual e iniciar um novo com a ração que desejar. Tudo isso sem nenhuma burocracia."
+  },
+];
+
+export default async function Home() {
+  // Buscamos os dados no servidor ANTES da página ser enviada para o navegador
+  const products = await getProducts();
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <main>
+      {/* Seção 1: Hero Section */}
+      <section className="w-full min-h-screen bg-maranatha-beige flex items-center py-20 lg:py-0">
+        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+          <div className="text-center md:text-left">
+            <p className="font-poppins text-sm font-bold text-maranatha-blue tracking-widest uppercase mb-2">
+              🐾 Clube de Assinatura Maranatha
+            </p>
+            <h1 className="font-poppins text-4xl md:text-5xl lg:text-6xl font-bold text-maranatha-blue leading-tight mb-4">
+              A Ração do Seu Melhor Amigo Chega Sozinha. E com Desconto.
+            </h1>
+            <p className="font-inter text-lg md:text-xl text-gray-800 font-medium mb-8">
+              Faça parte do nosso Clube de Assinatura, escolha as marcas que seu pet ama e receba em casa, na data ideal para você. Simples, automático e sem estresse.
+            </p>
+            <a href="#planos" className="inline-block bg-maranatha-red text-white font-bold py-4 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-maranatha-red text-lg">
+              CONHECER PLANOS
+            </a>
+          </div>
+          <div className="flex justify-center">
+            <Image 
+              src="https://images.pexels.com/photos/5749797/pexels-photo-5749797.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+              alt="Dono feliz com seu cão e um pacote de ração"
+              width={600}
+              height={600}
+              className="rounded-lg shadow-maranatha-lg object-cover"
+              priority
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Seção 2: Benefícios */}
+      <section id="beneficios" className="w-full bg-white py-20">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="font-poppins text-3xl md:text-4xl font-bold text-maranatha-blue">
+            Sua rotina mais leve. Seu pet mais feliz.
+          </h2>
+          <p className="font-inter mt-4 text-lg text-gray-700 max-w-2xl mx-auto">
+            Nosso clube foi pensado para eliminar suas preocupações, trazendo mais praticidade e economia para o seu dia a dia.
+          </p>
+          <div className="grid md:grid-cols-3 gap-12 mt-16">
+            <div className="flex flex-col items-center">
+              <div className="bg-maranatha-red/10 p-4 rounded-full">
+                <Truck className="h-10 w-10 text-maranatha-red" />
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Receba em Casa, Sem Esforço
+              </h3>
+              <p className="font-inter text-gray-600">
+                Chega de correr para o pet shop de última hora ou carregar pacotes pesados. Nós levamos a ração favorita do seu pet até a sua porta.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-maranatha-red/10 p-4 rounded-full">
+                <PiggyBank className="h-10 w-10 text-maranatha-red" />
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Economize em Todo Pedido
+              </h3>
+              <p className="font-inter text-gray-600">
+                Ser membro do nosso clube significa ter desconto garantido em todas as entregas da sua assinatura. Cuidar bem do seu pet agora pesa menos no bolso.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="bg-maranatha-red/10 p-4 rounded-full">
+                <CalendarCheck className="h-10 w-10 text-maranatha-red" />
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Você no Controle, Sempre
+              </h3>
+              <p className="font-inter text-gray-600">
+                Vai viajar? Precisa alterar a data ou o produto? Pause, altere ou cancele sua assinatura quando quiser, sem burocracia e sem multas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    
+      {/* Seção 3: Como Funciona */}
+      <section id="como-funciona" className="w-full bg-maranatha-beige py-20">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="font-poppins text-3xl md:text-4xl font-bold text-maranatha-blue">
+            Ter essa tranquilidade é fácil. Veja como:
+          </h2>
+          <div className="grid md:grid-cols-3 gap-12 mt-16">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-24 w-24 rounded-full bg-maranatha-blue/10">
+                <span className="font-poppins text-4xl font-bold text-maranatha-blue">1</span>
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Escolha a Ração
+              </h3>
+              <p className="font-inter text-gray-600">
+                Navegue por nossa seleção de rações e escolha a preferida do seu campeão.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-24 w-24 rounded-full bg-maranatha-blue/10">
+                <span className="font-poppins text-4xl font-bold text-maranatha-blue">2</span>
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Personalize a Entrega
+              </h3>
+              <p className="font-inter text-gray-600">
+                Defina a frequência (ex: a cada 30 dias) e o melhor dia do mês para a cobrança e entrega.
+              </p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center h-24 w-24 rounded-full bg-maranatha-blue/10">
+                <span className="font-poppins text-4xl font-bold text-maranatha-blue">3</span>
+              </div>
+              <h3 className="font-poppins text-xl font-bold text-maranatha-blue mt-6 mb-2">
+                Relaxe e Aproveite
+              </h3>
+              <p className="font-inter text-gray-600">
+                Pronto! A cobrança é automática no seu cartão e nós cuidamos para que a ração chegue sempre na data certa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    
+      {/* Seção 4: Catálogo de Produtos */}
+      <ProductSection initialProducts={products} />
+
+      {/* Seção 5: FAQ */}
+      <section id="faq" className="w-full bg-maranatha-beige py-20">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="font-poppins text-3xl md:text-4xl font-bold text-maranatha-blue">
+            Ainda tem dúvidas? A gente responde.
+          </h2>
+          <p className="font-inter mt-4 text-lg text-gray-700 max-w-2xl mx-auto">
+            Separamos as perguntas mais comuns para te ajudar a tomar a melhor decisão para você e seu pet.
+          </p>
+          <div className="mt-12">
+            <FaqAccordion items={faqItems} />
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

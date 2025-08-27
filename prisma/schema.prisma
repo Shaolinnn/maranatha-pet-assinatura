@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Gaveta de Clientes
+model Customer {
+  id            Int            @id @default(autoincrement())
+  name          String
+  email         String         @unique
+  phone         String? // O '?' torna o campo opcional
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  subscriptions Subscription[] // Relação: Um cliente pode ter várias assinaturas
+}
+
+// Gaveta de Produtos
+model Product {
+  id          Int            @id @default(autoincrement())
+  name        String
+  category    String
+  imageUrl    String?
+  basePrice   Decimal
+  subscriptions Subscription[] // Relação: Um produto pode estar em várias assinaturas
+}
+
+// Gaveta de Assinaturas
+model Subscription {
+  id            Int                @id @default(autoincrement())
+  dueDay        Int
+  price         Decimal
+  status        SubscriptionStatus @default(ACTIVE) // Usa nosso Enum abaixo
+  mercadoPagoId String             @unique
+  createdAt     DateTime           @default(now())
+
+  // Relação com Cliente
+  customer      Customer @relation(fields: [customerId], references: [id])
+  customerId    Int
+
+  // Relação com Produto
+  product       Product @relation(fields: [productId], references: [id])
+  productId     Int
+}
+
+// Definindo os valores possíveis para o status
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  INACTIVE
+}

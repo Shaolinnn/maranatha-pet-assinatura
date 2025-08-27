@@ -1,0 +1,17 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine # Usamos uma imagem oficial e leve do PostgreSQL
+    container_name: petvip-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: user_petvip
+      POSTGRES_PASSWORD: password_segura_local # Use esta senha ou troque por outra segura
+      POSTGRES_DB: petvip_db
+    ports:
+      - "5432:5432" # Mapeia a porta do container para a porta da sua máquina
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data # Garante que os dados não sejam perdidos ao desligar o container
