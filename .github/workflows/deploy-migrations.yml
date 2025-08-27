@@ -1,0 +1,35 @@
+# .github/workflows/deploy-migrations.yml
+
+name: Deploy Prisma Migrations
+
+# Aciona o workflow toda vez que houver um push na branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest # Roda em uma máquina virtual Linux do GitHub
+
+    steps:
+      # 1. Baixa o seu código para a máquina virtual
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configura o ambiente Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. Instala as dependências do projeto
+      - name: Install dependencies
+        run: npm install
+
+      # 4. Roda o comando de migração
+      - name: Run Prisma Migrate
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
