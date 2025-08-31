@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import StatusBadge from './StatusBadge';
-import { MoreVertical, MessageSquare, Edit } from 'lucide-react';
+import { MessageSquare, Edit } from 'lucide-react';
 
 // Definindo o tipo para um objeto de assinatura
 type Subscription = {
   customer: {
     name: string;
-    avatarUrl: string;
+    // Passo 1: Corrigimos o tipo para aceitar string ou null
+    avatarUrl: string | null; 
   };
   product: string;
   value: string;
@@ -41,7 +42,14 @@ export default function SubscriptionsTable({ subscriptions }: SubscriptionsTable
               <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="py-3 px-4">
                   <div className="flex items-center">
-                    <Image src={sub.customer.avatarUrl} alt={sub.customer.name} width={40} height={40} className="rounded-full mr-3" />
+                    {/* Passo 2: Adicionamos uma imagem placeholder caso a avatarUrl seja nula */}
+                    <Image 
+                      src={sub.customer.avatarUrl || `https://ui-avatars.com/api/?name=${sub.customer.name.charAt(0)}`} 
+                      alt={sub.customer.name} 
+                      width={40} 
+                      height={40} 
+                      className="rounded-full mr-3" 
+                    />
                     <span className="font-medium">{sub.customer.name}</span>
                   </div>
                 </td>

@@ -6,41 +6,72 @@ import StatCard from '@/components/StatCard';
 import SubscriptionsTable from '@/components/SubscriptionsTable';
 import NewSubscriptionModal from '@/components/NewSubscriptionModal';
 import { CheckCircle2, Clock, DollarSign, CalendarDays, Plus } from 'lucide-react';
+import { Product, Customer, SubscriptionWithDetails } from '@/types';
 
-// Tipos para nossos dados, para garantir a consistência
-type Product = { id: number; name: string; };
-type Customer = { id: number; name: string; };
-type Subscription = {
-  customer: { name: string; avatarUrl: string; };
+type FormattedSubscription = {
+  customer: { name: string; avatarUrl: string | null; };
   product: string;
   value: string;
   dueDate: string;
-  status: 'Ativa' | 'Pendente' | 'Inativa';
+  status: 'Ativa' | 'Pendente' | 'Inativa'; // O tipo específico que queremos
 };
 
 export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-  // Estados para guardar os dados que virão da API
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [subscriptions, setSubscriptions] = useState<FormattedSubscription[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect para buscar os dados quando o componente carregar
+  async function fetchData() {
+    setIsLoading(true);
+    try {
+      const [productsRes, customersRes, subscriptionsRes] = await Promise.all([
+        fetch('/api/products'),
+        fetch('/api/customers'),
+        fetch('/api/subscriptions')
+      ]);
+      
+      const productsData: Product[] = await productsRes.json();
+      const customersData: Customer[] = await customersRes.json();
+      const subscriptionsData: SubscriptionWithDetails[] = await subscriptionsRes.json();
+
+      setProducts(productsData);
+      setCustomers(customersData);
+
+      const formattedSubscriptions = subscriptionsData.map((sub) => ({
+        customer: {
+          name: sub.customer.name,
+          avatarUrl: sub.customer.avatarUrl || `https://ui-avatars.com/api/?name=${sub.customer.name.charAt(0)}`
+        },
+        product: sub.product.name,
+        value: `R$ ${String(sub.price)}`,
+        dueDate: `Todo dia ${sub.dueDay}`,
+        // AQUI ESTÁ A CORREÇÃO: Usamos 'as' para afirmar o tipo
+        status: (sub.status === 'ACTIVE' ? 'Ativa' : (sub.status === 'PENDING' ? 'Pendente' : 'Inativa')) as 'Ativa' | 'Pendente' | 'Inativa',
+      }));
+      
+      setSubscriptions(formattedSubscriptions);
+
+    } catch (error) {
+      console.error("Falha ao buscar dados para o dashboard:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
-    // Simulação de fetch de dados. Em um app real, aqui fariam as chamadas à API.
-    const mockSubscriptions = [
-      { customer: { name: 'Maria Silva', avatarUrl: 'https://ui-avatars.com/api/?name=Maria+Silva' }, product: 'Ração Premium Cães Adultos - 15kg', value: 'R$ 159,90', dueDate: '28/08/2025', status: 'Ativa' as const },
-      // ...outros dados mock
-    ];
-    const mockProducts = [{id: 1, name: 'Ração Premium Cães Adultos - 15kg'}, {id: 2, name: 'Ração Especial Gatos Castrados - 10kg'}];
-    const mockCustomers = [{id: 1, name: 'Maria Silva'}, {id: 2, name: 'João Santos'}];
-
-    setSubscriptions(mockSubscriptions);
-    setProducts(mockProducts);
-    setCustomers(mockCustomers);
+    fetchData();
   }, []);
+  
+  const handleSubscriptionCreated = () => {
+    setIsModalOpen(false);
+    fetchData();
+  }
 
+  if (isLoading) {
+    return <div>Carregando dashboard...</div>;
+  }
 
   return (
     <div>
@@ -56,18 +87,17 @@ export default function DashboardPage() {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        <StatCard title="Assinaturas Ativas" value="24" icon={<CheckCircle2 />} color="#34a853" />
-        <StatCard title="Pendentes de Pagamento" value="8" icon={<Clock />} color="#fbbc04" />
-        <StatCard title="Receita Mensal" value="R$ 3.240,00" icon={<DollarSign />} color="#4285f4" />
-        <StatCard title="Vencimento Hoje" value="3" icon={<CalendarDays />} color="#ea4335" />
+        <StatCard title="Assinaturas Ativas" value={subscriptions.filter(s => s.status === 'Ativa').length.toString()} icon={<CheckCircle2 />} color="#34a853" />
+        <StatCard title="Pendentes de Pagamento" value={subscriptions.filter(s => s.status === 'Pendente').length.toString()} icon={<Clock />} color="#fbbc04" />
+        <StatCard title="Receita Mensal" value="R$ --" icon={<DollarSign />} color="#4285f4" />
+        <StatCard title="Vencimento Hoje" value="--" icon={<CalendarDays />} color="#ea4335" />
       </div>
 
       <SubscriptionsTable subscriptions={subscriptions} />
       
-      {/* Passando os dados para o modal como props */}
       <NewSubscriptionModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleSubscriptionCreated}
         products={products}
         customers={customers}
       />
